@@ -78,7 +78,7 @@ Evaluated on a held-out test split, the optimized churn classification pipeline 
 
 Here is a preview of the **Executive Revenue Risk & Portfolio Analytics Hub** built natively in Databricks Lakeview:
 
-![Executive Dashboard Preview](assets/dashboard.png)
+![Executive Dashboard Preview](assets/dashaboard.png)
 The platform feeds directly into an interactive executive dashboard featuring:
 * **Executive Summary KPIs:** Total portfolio accounts, total projected CLV, average churn risk, and estimated revenue saved.
 * **Interactive What-If Simulation:** Dynamic slider parameters (`:RetentionImprovement`) enabling leadership to model real-time financial recapturing and long-term portfolio growth.
