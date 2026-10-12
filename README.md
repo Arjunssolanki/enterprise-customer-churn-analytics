@@ -1,3 +1,4 @@
+![Databricks CI/CD Pipeline](https://github.com/Arjunssolanki/enterprise-customer-churn-analytics/actions/workflows/databricks_ci_cd.yml/badge.svg)
 # Enterprise Customer Churn Analytics & Lifetime Value Prediction Platform
 
 An end-to-end, production-grade customer churn and Customer Lifetime Value (CLV) analytics platform built entirely on **Databricks Delta Lake**, **Python Machine Learning (XGBoost)**, and **Databricks Lakeview Dashboards**.
@@ -57,9 +58,22 @@ This platform implements a modern **Medallion Lakehouse Architecture** to ingest
 * **Dual Modeling:** Trains an `XGBClassifier` for churn probability alongside an `XGBRegressor` for Customer Lifetime Value (CLV).
 * **Artifact Export:** Serializes trained pipelines to disk (`churn_classifier_model.pkl`, `clv_regressor_model.pkl`) and persists scored inference outputs back to Delta Lake.
 
-### 5. CI/CD Pipeline Automation (`databricks_ci_cd.yml`)
-* Automated GitHub Actions workflow enforcing code quality standards via `flake8`.
-* Securely validates Databricks workspace authentication and CLI connection parameters on main branch pushes.
+## ⚙️ Automated CI/CD Pipeline (`.github/workflows/databricks_ci_cd.yml`)
+
+This repository uses **GitHub Actions** for automated code linting, quality assurance, and Databricks authentication validation on every push and pull request.
+### 🟢 Pipeline Execution Status
+
+![GitHub Actions CI/CD Pipeline Success](assets/cicd.png)
+
+### Pipeline Stages & Workflow Execution
+1. **`lint-and-validate` Job:**
+   * Sets up Python 3.10 and installs `flake8`.
+   * Executes static code analysis, ignoring runtime Databricks PySpark session objects (`spark`) via `--ignore=F821`.
+2. **`validate-databricks-connection` Job:**
+   * Configures the Databricks CLI (`databricks/setup-cli@main`).
+   * Validates workspace parameters (`DATABRICKS_HOST` and `DATABRICKS_TOKEN`) stored securely in GitHub Repository Secrets.
+
+> 🟢 **Verified Status:** Automated workflow executed successfully in **23s** across all linting and authentication validation jobs.
 
 ---
 
