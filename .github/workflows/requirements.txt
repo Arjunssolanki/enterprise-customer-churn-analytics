@@ -1,0 +1,15 @@
+# ============================================================================
+# PROJECT: AI-Powered Customer Churn Analytics & Lifetime Value Predictor
+# COMPONENT: Project Infrastructure Dependencies
+# ============================================================================
+
+# Core Data Manipulation
+numpy==1.26.4
+pandas==2.2.2
+
+# Machine Learning & Feature Engineering Frameworks
+scikit-learn==1.5.1
+xgboost==2.1.1
+
+# Quality Assurance & Code Linting
+flake8==7.1.0
