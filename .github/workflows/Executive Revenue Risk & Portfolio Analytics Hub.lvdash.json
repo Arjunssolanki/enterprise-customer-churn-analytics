@@ -1,0 +1,625 @@
+{
+  "datasets": [
+    {
+      "name": "bf48cf9b",
+      "displayName": "final_predictions_output",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.customer_churn_analytics.final_predictions_output",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "06ae7c67",
+      "displayName": "Revenue_Simulation_Engine",
+      "queryLines": [
+        "SELECT \r\n",
+        "    COUNT(DISTINCT customer_id) AS total_portfolio_accounts,\r\n",
+        "    SUM(predicted_lifetime_value) AS total_portfolio_clv,\r\n",
+        "    AVG(churn_risk_score) AS average_portfolio_churn_risk,\r\n",
+        "    SUM(CASE WHEN risk_tier = 'High Risk' THEN current_monthly_rev ELSE 0.00 END) AS monthly_revenue_at_risk,\r\n",
+        "    SUM(CASE WHEN risk_tier = 'High Risk' THEN current_monthly_rev ELSE 0.00 END) * :RetentionImprovement AS simulated_revenue_recaptured,\r\n",
+        "    SUM(predicted_lifetime_value) + (SUM(CASE WHEN risk_tier = 'High Risk' THEN current_monthly_rev ELSE 0.00 END) * :RetentionImprovement * 12) AS final_simulated_portfolio_value\r\n",
+        "FROM customer_churn_analytics.final_predictions_output;\r\n"
+      ],
+      "parameters": [
+        {
+          "displayName": "RetentionImprovement",
+          "keyword": "RetentionImprovement",
+          "dataType": "STRING",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "0.10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "4934fa3a",
+      "displayName": "Executive Overview",
+      "layout": [
+        {
+          "widget": {
+            "name": "total-tracked-portfolio-accounts",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "bf48cf9b",
+                  "fields": [
+                    {
+                      "name": "count(customer_id)",
+                      "expression": "COUNT(`customer_id`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block\"><span style=\"font-size: 10px;\">Total Tracked Portfolio Accounts</span></span>\n<p>&nbsp;</p>\n",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "count(customer_id)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f66abaac",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "bf48cf9b",
+                  "fields": [
+                    {
+                      "name": "sum(predicted_lifetime_value)",
+                      "expression": "SUM(`predicted_lifetime_value`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block\"><span style=\"font-size: 10px;\">Total Projected Portfolio Value (CLV)</span></span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(predicted_lifetime_value)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "35bf2661",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "bf48cf9b",
+                  "fields": [
+                    {
+                      "name": "avg(churn_risk_score)",
+                      "expression": "AVG(`churn_risk_score`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block\"> Average Churn Risk Score</span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(churn_risk_score)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "monthly-revenue-exposure-customer-segment",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "bf48cf9b",
+                  "fields": [
+                    {
+                      "name": "risk_tier",
+                      "expression": "`risk_tier`"
+                    },
+                    {
+                      "name": "segment",
+                      "expression": "`segment`"
+                    },
+                    {
+                      "name": "sum(current_monthly_rev)",
+                      "expression": "SUM(`current_monthly_rev`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<p>&nbsp;</p>\n\nMonthly Revenue Exposure by Customer Segment",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "segment",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(current_monthly_rev)",
+                  "axis": {
+                    "hideLabels": false,
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "risk_tier",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "High Risk",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      },
+                      {
+                        "value": "Low Risk",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 3
+                        }
+                      },
+                      {
+                        "value": "Medium Risk",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 2
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "what-if-retention-improvement",
+            "queries": [
+              {
+                "name": "parameter_dashboards/01f1c616241312f2b997cfddede705a8/datasets/01f1c61cefa716a6980dafc997cc3f13_RetentionImprovement",
+                "query": {
+                  "datasetName": "06ae7c67",
+                  "parameters": [
+                    {
+                      "name": "RetentionImprovement",
+                      "keyword": "RetentionImprovement"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "What-If: Retention Improvement %",
+                  "fields": []
+                }
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "parameterName": "RetentionImprovement",
+                    "queryName": "parameter_dashboards/01f1c616241312f2b997cfddede705a8/datasets/01f1c61cefa716a6980dafc997cc3f13_RetentionImprovement"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 0,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "d659a619",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "06ae7c67",
+                  "fields": [
+                    {
+                      "name": "avg(simulated_revenue_recaptured)",
+                      "expression": "AVG(`simulated_revenue_recaptured`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block\">Est. Revenue Saved</span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(simulated_revenue_recaptured)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "top-priority-high-value-at-risk-accounts",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "bf48cf9b",
+                  "fields": [
+                    {
+                      "name": "customer_id",
+                      "expression": "`customer_id`"
+                    },
+                    {
+                      "name": "segment",
+                      "expression": "`segment`"
+                    },
+                    {
+                      "name": "avg(churn_risk_score)",
+                      "expression": "AVG(`churn_risk_score`)"
+                    },
+                    {
+                      "name": "predicted_lifetime_value",
+                      "expression": "`predicted_lifetime_value`"
+                    },
+                    {
+                      "name": "high_priority_tickets_30d",
+                      "expression": "`high_priority_tickets_30d`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "TOP PRIORITY: High-Value At-Risk Accounts",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "customer_id"
+                  },
+                  {
+                    "fieldName": "segment"
+                  },
+                  {
+                    "fieldName": "avg(churn_risk_score)",
+                    "contentAlignment": "center",
+                    "format": {
+                      "type": "number-percent",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 2
+                      },
+                      "hideGroupSeparator": true
+                    },
+                    "displayName": "Churn Risk Score"
+                  },
+                  {
+                    "fieldName": "predicted_lifetime_value",
+                    "contentAlignment": "center",
+                    "format": {
+                      "type": "number-plain",
+                      "abbreviation": "none",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 2
+                      },
+                      "hideGroupSeparator": true
+                    }
+                  },
+                  {
+                    "fieldName": "high_priority_tickets_30d",
+                    "contentAlignment": "center"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 8,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "churn-probability-vs-customer-tenure",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "bf48cf9b",
+                  "fields": [
+                    {
+                      "name": "tenure_months",
+                      "expression": "`tenure_months`"
+                    },
+                    {
+                      "name": "avg(churn_risk_score)",
+                      "expression": "AVG(`churn_risk_score`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Churn Probability vs. Customer Tenure.\n<p>&nbsp;</p>\n",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "tenure_months",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(churn_risk_score)",
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 8,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "avg-churn-risk-by-acquisition-channel",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "bf48cf9b",
+                  "fields": [
+                    {
+                      "name": "risk_tier",
+                      "expression": "`risk_tier`"
+                    },
+                    {
+                      "name": "avg(churn_risk_score)",
+                      "expression": "AVG(`churn_risk_score`)"
+                    },
+                    {
+                      "name": "acquisition_channel",
+                      "expression": "`acquisition_channel`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Avg. Churn Risk by Acquisition Channel\n<p>&nbsp;</p>\n",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "avg(churn_risk_score)",
+                  "axis": {
+                    "hideLabels": false,
+                    "hideTitle": false,
+                    "title": "churn risk score"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "acquisition_channel",
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "color": {
+                  "fieldName": "risk_tier",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 2,
+            "width": 4,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
